@@ -1,0 +1,9 @@
+## Interface: 120000, 120001
+## Title: BagColorCoder
+## Notes: Highlights bag slots in the combined bag view with a color per bag. Fully configurable.
+## Author: You
+## Version: 1.0.0
+## SavedVariables: BagColorCoderDB
+## IconTexture: Interface\Icons\INV_Misc_Bag_07
+
+BagColorCoder.lua
