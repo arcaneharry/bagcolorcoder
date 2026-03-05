@@ -334,23 +334,38 @@ local function CreateSettingsPanel()
     desc:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
     desc:SetText("Colour-code and separate bag slots in the combined bag view.")
 
+    -- Helper to create a checkbox that works across WoW versions
+    local function MakeCheckbox(parent, labelText, anchorTo, anchorPoint, xOff, yOff)
+        local cb = CreateFrame("CheckButton", nil, parent)
+        cb:SetSize(26, 26)
+        cb:SetPoint(anchorPoint or "TOPLEFT", anchorTo, "BOTTOMLEFT", xOff or 0, yOff or -4)
+
+        cb:SetNormalTexture("Interface\\Buttons\\UI-CheckBox-Up")
+        cb:SetPushedTexture("Interface\\Buttons\\UI-CheckBox-Down")
+        cb:SetHighlightTexture("Interface\\Buttons\\UI-CheckBox-Highlight", "ADD")
+        cb:SetCheckedTexture("Interface\\Buttons\\UI-CheckBox-Check")
+
+        local label = cb:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+        label:SetPoint("LEFT", cb, "RIGHT", 4, 0)
+        label:SetText(labelText)
+        cb.label = label
+
+        return cb
+    end
+
     -- Enable checkbox
-    local enableCB = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
-    enableCB:SetPoint("TOPLEFT", desc, "BOTTOMLEFT", -2, -16)
-    enableCB.Text:SetText("Enable bag colour borders")
+    local enableCB = MakeCheckbox(panel, "Enable bag colour borders", desc, "TOPLEFT", -2, -16)
     enableCB:SetChecked(db.enabled)
     enableCB:SetScript("OnClick", function(self)
-        db.enabled = self:IsChecked()
+        db.enabled = self:GetChecked() and true or false
         if db.enabled then RefreshAllButtons() else HideAllOverlays() end
     end)
 
     -- Row-break checkbox
-    local breakCB = CreateFrame("CheckButton", nil, panel, "InterfaceOptionsCheckButtonTemplate")
-    breakCB:SetPoint("TOPLEFT", enableCB, "BOTTOMLEFT", 0, -4)
-    breakCB.Text:SetText("New row for each bag (combined view)")
+    local breakCB = MakeCheckbox(panel, "New row for each bag (combined view)", enableCB, "TOPLEFT", 0, -4)
     breakCB:SetChecked(db.breakRows)
     breakCB:SetScript("OnClick", function(self)
-        db.breakRows = self:IsChecked()
+        db.breakRows = self:GetChecked() and true or false
         RefreshAllButtons()
     end)
 
@@ -383,22 +398,31 @@ local function CreateSettingsPanel()
         txt:SetPoint("LEFT", swatch, "RIGHT", 8, 0)
         txt:SetText(label)
 
-        local slider = CreateFrame("Slider", nil, row, "OptionsSliderTemplate")
+        local slider = CreateFrame("Slider", nil, row, BackdropTemplateMixin and "BackdropTemplate" or nil)
         slider:SetSize(120, 16)
         slider:SetPoint("LEFT", txt, "RIGHT", 16, 0)
+        slider:SetOrientation("HORIZONTAL")
         slider:SetMinMaxValues(0, 1)
         slider:SetValueStep(0.05)
         slider:SetObeyStepOnDrag(true)
         slider:SetValue(color.a)
-        slider.Low:SetText("0%")
-        slider.High:SetText("100%")
-        slider.Text:SetText(math.floor(color.a * 100) .. "%")
+        slider:SetThumbTexture("Interface\\Buttons\\UI-SliderBar-Button-Horizontal")
+        slider:SetBackdrop({
+            bgFile = "Interface\\Buttons\\UI-SliderBar-Background",
+            edgeFile = "Interface\\Buttons\\UI-SliderBar-Border",
+            tile = true, tileSize = 8, edgeSize = 8,
+            insets = { left = 3, right = 3, top = 6, bottom = 6 },
+        })
+
+        local sliderText = slider:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+        sliderText:SetPoint("TOP", slider, "BOTTOM", 0, -1)
+        sliderText:SetText(math.floor(color.a * 100) .. "%")
 
         local bagIndex = bagIdx
 
         slider:SetScript("OnValueChanged", function(self, value)
             db.colors[bagIndex].a = value
-            self.Text:SetText(math.floor(value * 100) .. "%")
+            sliderText:SetText(math.floor(value * 100) .. "%")
             RefreshAllButtons()
         end)
 
