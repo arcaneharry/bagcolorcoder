@@ -12,7 +12,7 @@ local NUM_BAGS     = Constants.InventoryConstants.NumBagSlots         -- 4
 local REAGENT_BAGS = Constants.InventoryConstants.NumReagentBagSlots or 0
 
 ----------------------------------------------------------------------
--- Default colours (RGBA, 0-1)  
+-- Default colours (RGBA, 0-1)   
 ----------------------------------------------------------------------
 local DEFAULT_COLORS = {
     [0] = { r = 1.0,  g = 0.4,  b = 0.7,  a = 0.8 },  -- Backpack  – pink
